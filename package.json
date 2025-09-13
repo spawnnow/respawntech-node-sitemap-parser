@@ -1,0 +1,49 @@
+{
+  "name": "@respawntech/node-xml-parser",
+  "version": "1.0.0",
+  "description": "nodejs xml parser",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "default": "./index.js"
+    }
+  },
+  "files": [
+    "index.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "undici": "7.16.0",
+    "fast-xml-parser": "5.2.5"
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2"
+  },
+  "keywords": [
+    "nodejs",
+    "xml",
+    "parser",
+    "sitemap",
+    "rss",
+    "atom"
+  ],
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/spawnnow/respawntech-node-xml-parser.git"
+  },
+  "bugs": {
+    "url": "https://github.com/spawnnow/respawntech-node-xml-parser/issues"
+  },
+  "homepage": "https://github.com/spawnnow/respawntech-node-xml-parser#readme"
+}
