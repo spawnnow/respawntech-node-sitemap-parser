@@ -1,7 +1,7 @@
 {
-  "name": "@respawntech/node-xml-parser",
+  "name": "@respawntech/node-sitemap-parser",
   "version": "1.0.0",
-  "description": "nodejs xml parser",
+  "description": "nodejs sitemap parser",
   "type": "module",
   "main": "index.js",
   "exports": {
@@ -40,10 +40,10 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/spawnnow/respawntech-node-xml-parser.git"
+    "url": "git+https://github.com/spawnnow/respawntech-node-sitemap-parser.git"
   },
   "bugs": {
-    "url": "https://github.com/spawnnow/respawntech-node-xml-parser/issues"
+    "url": "https://github.com/spawnnow/respawntech-node-sitemap-parser/issues"
   },
-  "homepage": "https://github.com/spawnnow/respawntech-node-xml-parser#readme"
+  "homepage": "https://github.com/spawnnow/respawntech-node-sitemap-parser#readme"
 }
