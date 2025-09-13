@@ -1,3 +1,4 @@
+# .github/workflows/publish-npm.yml
 name: Publish to npm
 
 on:
@@ -7,14 +8,14 @@ on:
 
 permissions:
   contents: read
-  id-token: write # needed for `npm publish --provenance`
 
 concurrency:
-  group: publish-${{ github.ref }}
-  cancel-in-progress: false
+  group: publish-npm-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   publish:
+    name: Publish if version is new
     runs-on: ubuntu-latest
 
     steps:
@@ -24,45 +25,51 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          registry-url: "https://registry.npmjs.org"
-          cache: "npm"
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+          cache: npm
 
-      - name: Verify tag matches package.json version
+      - name: Install
+        run: npm ci
+
+      - name: Build (if present)
+        run: npm run build --if-present
+
+      - name: Check if this version already exists on npm
+        id: check
+        shell: bash
         run: |
-          TAG="${GITHUB_REF#refs/tags/}"
-          PKG_VERSION=$(node -p "require('./package.json').version")
-          echo "Tag: $TAG ; package.json: v$PKG_VERSION"
-          if [ "$TAG" != "v$PKG_VERSION" ]; then
-            echo "Tag version and package.json version mismatch"; exit 1; fi
-
-      - name: Install deps
-        run: npm ci --ignore-scripts
-
-      - name: Preview package contents
-        run: npm pack --dry-run
-
-      - name: Skip if this version is already on npm
-        id: check_published
-        run: |
+          set -euo pipefail
           NAME=$(node -p "require('./package.json').name")
           VERSION=$(node -p "require('./package.json').version")
-          PUBLISHED=$(npm view "$NAME@${VERSION}" version || true)
-          if [ "$PUBLISHED" = "$VERSION" ]; then
-            echo "already=true" >> "$GITHUB_OUTPUT"
+          echo "package=$NAME" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+          if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
+            echo "should-publish=false" >> "$GITHUB_OUTPUT"
+            echo "Version $VERSION already exists on npm for $NAME. Skipping publish."
           else
-            echo "already=false" >> "$GITHUB_OUTPUT"
+            echo "should-publish=true" >> "$GITHUB_OUTPUT"
+            echo "Version $VERSION not found on npm for $NAME. Will publish."
           fi
 
-      - name: Publish
-        if: steps.check_published.outputs.already == 'false'
+      - name: Publish to npm
+        if: steps.check.outputs.should-publish == 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        shell: bash
         run: |
-          # If your package.json has "publishConfig": { "access": "public" }
-          # you can drop the --access flag.
-          npm publish --provenance --access public
+          set -euo pipefail
+          NAME=${{ steps.check.outputs.package }}
+          # If the package is scoped, first publish requires --access public.
+          if node -p "require('./package.json').name.startsWith('@') ? 'true' : 'false'" | grep -q true; then
+            npm publish --access public
+          else
+            npm publish
+          fi
 
-      - name: Done (already published)
-        if: steps.check_published.outputs.already == 'true'
-        run: echo "This version is already on npm. Skipping publish."
+      - name: Summary
+        run: |
+          echo "Package: ${{ steps.check.outputs.package }}" >> $GITHUB_STEP_SUMMARY
+          echo "Version: ${{ steps.check.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "Published: ${{ steps.check.outputs.should-publish }}" >> $GITHUB_STEP_SUMMARY
