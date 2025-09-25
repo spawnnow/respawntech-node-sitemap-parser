@@ -1,9 +1,10 @@
 {
   "name": "@respawntech/node-sitemap-parser",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "nodejs sitemap parser",
   "type": "module",
   "main": "index.js",
+  "types": "index.d.ts",
   "exports": {
     ".": {
       "import": "./index.js",
